@@ -47,9 +47,9 @@ class Hard75Challenge(commands.Cog):
         await ctx.send(embed=embed)
 
         
-    async def _checkAcdProbs(self,submissions):
+    async def _checkAcdProbs(self,rating,submissions):
         solved = {sub.problem.name for sub in submissions}
-        problems = [prob for prob in acdProbs.getProblems()
+        problems = [prob for prob in acdProbs.getProblems(rating)
                     if (prob['name'] not in solved)]
 
         if not problems:
@@ -67,7 +67,7 @@ class Hard75Challenge(commands.Cog):
 
     async def _pickProblem(self, handle, rating, submissions):
         #if a ACD Ladder problem is available then give that!
-        acdProblem=await self._checkAcdProbs(submissions)
+        acdProblem=await self._checkAcdProbs(rating,submissions)
         if(len(acdProblem)):
             return acdProblem
         solved = {sub.problem.name for sub in submissions}
