@@ -16,7 +16,7 @@ from tle.util.db.user_db_conn import Gitgud
 from tle.util import paginator
 from tle.util import cache_system2
 from tle.util import table
-
+from tle.util import ACDLaddersProblems as acdProbs
 class Hard75CogError(commands.CommandError):
     pass
 
@@ -46,7 +46,30 @@ class Hard75Challenge(commands.Cog):
         embed.add_field(name='Rating', value=problem.rating)
         await ctx.send(embed=embed)
 
+        
+    async def _checkAcdProbs(self,submissions):
+        solved = {sub.problem.name for sub in submissions}
+        problems = [prob for prob in acdProbs.getProblems()
+                    if (prob['name'] not in solved)]
+
+        if not problems:
+            return {}
+        class dotdict(dict):
+            """dot.notation access to dictionary attributes"""
+            __getattr__ = dict.get
+            __setattr__ = dict.__setitem__
+            __delattr__ = dict.__delitem__
+        
+        problem=problems[0]
+        dotProblem = dotdict(problem)
+        return dotProblem
+    
+
     async def _pickProblem(self, handle, rating, submissions):
+        #if a ACD Ladder problem is available then give that!
+        acdProblem=self._checkAcdProbs(submissions)
+        if(len(acdProblem)):
+            return acdProblem
         solved = {sub.problem.name for sub in submissions}
         problems = [prob for prob in cf_common.cache2.problem_cache.problems
                     if (prob.rating == rating 
