@@ -59,10 +59,11 @@ class Hard75Challenge(commands.Cog):
             __getattr__ = dict.get
             __setattr__ = dict.__setitem__
             __delattr__ = dict.__delitem__
-        
-        problem=problems[0]
-        dotProblem = dotdict(problem)
-        return dotProblem
+        for problem in problems:
+            if (cf_common.cache2.problem_cache.problem_by_name[problem['name']].rating ==rating
+                and cf_common.cache2.problem_cache.problem_by_name[problem['name']].contestId == problem['contestId']):
+                return dotdict(problem)
+        return {}
     
 
     async def _pickProblem(self, handle, rating, submissions):
