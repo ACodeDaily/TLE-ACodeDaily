@@ -130,7 +130,7 @@ async def presence(bot):
         while True:
             target = random.choice([
                 "i_pranav","badal_arya","abhi_wd",
-                "thoughtlessnerd","hikaku","HimanshuRaj","rahul7_77","kaushik","pirate king","denjell","harsh rishi miglani"])
+                "thoughtlessnerd","hikaku","HimanshuRaj","denjell","harsh rishi miglani","Melon King","glenJP123"])
             await bot.change_presence(activity=discord.Game(
                 name=f'{target} orz'))
             await asyncio.sleep(10 * 60)
