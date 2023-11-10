@@ -254,7 +254,9 @@ class Hard75Challenge(commands.Cog):
         else:
             current_streak=0
         if(current_streak==0):      # on first day!
-            current_streak=1    
+            current_streak=1   
+        if current_streak % 75 == 0:
+            await ctx.guild.get_member(user_id).add_roles(discord.utils.get(ctx.guild.roles, name = "Hard 75 Completed"))
 
         longest_streak=max(current_streak,longest_streak)
         rc=cf_common.user_db.updateStreak_Hard75Challenge(user_id,current_streak,longest_streak, today)
