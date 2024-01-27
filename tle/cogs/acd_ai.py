@@ -167,7 +167,7 @@ class ACDAI(commands.Cog):
 
 
         if str(message.channel.id) in self.chats:
-            client.loop.create_task(get_response(message, chats[str(message.channel.id)])) # type: ignore
+            self.bot.loop.create_task(self.get_response(message, self.chats[str(message.channel.id)])) # type: ignore
         elif message.content:
             first = message.content.split()[0]
             if first == "$chat":
