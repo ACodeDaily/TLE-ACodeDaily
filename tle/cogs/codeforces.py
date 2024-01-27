@@ -4,7 +4,6 @@ from typing import List
 import math
 import time
 from collections import defaultdict
-#knkn
 
 import discord
 from discord.ext import commands
