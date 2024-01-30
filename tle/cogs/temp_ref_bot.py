@@ -33,8 +33,10 @@ class RefferalBot(commands.Cog):
         url = self.get_url(cf_handle, discord_id)
         user = cf_common.user_db.fetch_cf_user(cf_handle)
         dm_channel = await ctx.author.create_dm()
-        if user.effective_rating < 100:
-            await dm_channel.send("You need to expert or above to apply for refferal.")
+        if not user:
+            await ctx.reply("Set your cf handle first with ``;handle identify cf_handle``")
+        elif user.effective_rating < 100:
+            await ctx.reply("You need to be expert or above to apply for refferal.")
         else:
             try:
                 payload = {
@@ -45,7 +47,8 @@ class RefferalBot(commands.Cog):
                 if "url" in response:
                     res = response["url"]
                     await dm_channel.send(f"{res}")
-                else: await dm_channel.send("NO")
+                    await ctx.reply("Sent!")
+                else: await dm_channel.send("No URL available")
             except Exception as e:
                 print(e)
         
