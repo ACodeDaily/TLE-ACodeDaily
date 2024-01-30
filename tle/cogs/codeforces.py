@@ -5,7 +5,6 @@ import math
 import time
 from collections import defaultdict
 
-
 import discord
 from discord.ext import commands
 
