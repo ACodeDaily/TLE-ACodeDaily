@@ -24,19 +24,33 @@ logger = logging.getLogger(__name__)
 class ACD_AI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        
+        '''ids of text channels which will be used for opening chat threads with ai'''
         self.allowed_channels: list = []
+        
+        '''for restricting use to only certain discord servers'''
         self.allowed_guilds: list = ALLOWED_GUILDS
+        
+        '''developer's discord user id (vedantmishra69)'''
         self.dev_id: int = DEV_ID
+        
         genai.configure(api_key=GEMINI_API_KEY)
+        
+        '''gemini model for text inputs'''
         self.text_model = genai.GenerativeModel(model_name="gemini-pro",
                               generation_config=settings.text_generation_config, 
                               safety_settings=settings.text_safety_settings)
+        
+        '''gemini model for image inputs'''
         self.image_model = genai.GenerativeModel(model_name="gemini-pro-vision",
                               generation_config=settings.image_generation_config, 
                               safety_settings=settings.image_safety_settings)
+        
+        '''to store chat session instances for each opened thread (thread_id: chat_session)'''
         self.chats: dict = {}
-    
+        
     async def print_response(self, response, message):
+        '''prints the response to thread channel recieved from get_response()'''
         async with message.channel.typing():
             strings = []
             for index in range(0, len(response), 2000):
@@ -52,6 +66,11 @@ class ACD_AI(commands.Cog):
     @sleep_and_retry
     @limits(calls=MAX_CALLS_PER_MINUTE, period=ONE_MINUTE)
     async def get_response(self, message, chat):
+        '''
+        takes message object and chat session instance
+        sends the message content (text/image) to gemini model
+        sends the response recieved from gemini to print_response()
+        '''
         async with message.channel.typing():
             image = None
             response = ""
@@ -85,9 +104,16 @@ class ACD_AI(commands.Cog):
         self.bot.loop.create_task(self.print_response(response, message))
     
     def has_permissions(self, message):
+        '''
+        returns True if the command is coming from the developer
+        but if the user is not the developer 
+        it check whether they have "manage_channels" permission
+        and it is coming from an unrestrcited discord server
+        '''
         return (message.author.guild_permissions.manage_channels and message.guild.id in self.allowed_guilds) or message.author.id == self.dev_id
     
     async def start_thread(self, message, is_public):
+        '''starts a thread on $chat or $private commands'''
         try:
             thread = await message.channel.create_thread(name = "Session with " + message.author.name, slowmode_delay = 1, auto_archive_duration = 60, message = message if is_public else None)
             await thread.add_user(message.author)
@@ -103,6 +129,8 @@ class ACD_AI(commands.Cog):
     async def on_message(self, message):
         if message.author == self.bot.user:
             return
+        
+        '''shows currently added text channels in the server for ai use'''
         if message.content.startswith("$show"):
             if self.has_permissions(message):
                 set_channels = []
@@ -118,6 +146,7 @@ class ACD_AI(commands.Cog):
             else:
                 await message.channel.send("you don't have ``Manage channels`` permission!")
 
+        '''sets a text channel for ai use'''
         if message.content.startswith("$set"):
             if self.has_permissions(message):
                 if message.channel.type == discord.ChannelType.text:
@@ -131,9 +160,11 @@ class ACD_AI(commands.Cog):
             else:
                 await message.channel.send("you don't have ``Manage channels`` permission!")
 
+        '''shows all working commands for ai feature'''
         if message.content.startswith("$help"):
             await message.channel.send(HELP_TEXT)
 
+        '''unsets a text channel for ai use'''
         if message.content.startswith("$unset"):
             if self.has_permissions(message):
                 if message.channel.id in self.allowed_channels:
@@ -144,6 +175,7 @@ class ACD_AI(commands.Cog):
             else:
                 await message.channel.send("you don't have ``Manage channel`` permission!")
 
+        '''deletes all active chat threads'''
         if message.content.startswith("$clear"):
             if message.author.guild_permissions.manage_threads:
                 for Id in self.allowed_channels:
@@ -157,7 +189,10 @@ class ACD_AI(commands.Cog):
             else:
                 await message.channel.send("you don't have ``Manage threads`` permission!")
 
-
+        '''
+        sends user's input for processing to gemini 
+        or starts a new chat thread with $chat or $private command
+        '''
         if str(message.channel.id) in self.chats:
             self.bot.loop.create_task(self.get_response(message, self.chats[str(message.channel.id)]))
         elif message.content:
