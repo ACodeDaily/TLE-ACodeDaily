@@ -35,8 +35,8 @@ class RefferalBot(commands.Cog):
         dm_channel = await ctx.author.create_dm()
         if not user:
             await ctx.reply("Set your cf handle first with ``;handle identify cf_handle``")
-        elif user.effective_rating < 100:
-            await ctx.reply("You need to be expert or above to apply for refferal.")
+        elif user.maxRating < 1400:
+            await ctx.reply("You need to be specialist or above to apply for refferal.")
         else:
             try:
                 payload = {
