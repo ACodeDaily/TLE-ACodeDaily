@@ -12,11 +12,12 @@ from tle import constants
 from tle.util import codeforces_api as cf
 from tle.util import codeforces_common as cf_common
 from tle.util import discord_common
-from tle.util.db.user_db_conn import Gitgud
+from tle.util.db.user_db_conn import Gitgud, UserDbConn
 from tle.util import paginator
 from tle.util import cache_system2
 from tle.util import table
 from tle.util import ACDLaddersProblems as acdProbs
+from tle.cogs.graphs import Graphs
 class Hard75CogError(commands.CommandError):
     pass
 
@@ -156,6 +157,20 @@ class Hard75Challenge(commands.Cog):
         
         embed = self._generateStreakEmbed(handle, current_streak, longest_streak, last_updated)
         await ctx.send(f'Thanks for participating in the challenge!', embed=embed)
+    
+    @hard75.command(brief='Get users progress', aliases=['prog'], usage='[@member|user_id]')
+    @cf_common.user_guard(group='hard75')
+    async def progress(self, ctx, member: discord.Member = None):
+        user_id = member.id if member else ctx.author.id
+        user_db = UserDbConn(constants.USER_DB_FILE_PATH)
+        first_date, last_date = user_db.get_Hard75Window(user_id)
+        yy1, mm1, dd1 = first_date.split('-')
+        yy2, mm2, dd2 = last_date.split('-')
+        dates = f"d>={dd1}{mm1}{yy1} d<{dd2}{mm2}{yy2}"
+        await Graphs.rating(ctx, dates)
+        
+        
+        
 
     @hard75.command(brief='Request hard75 problems for today', aliases=['start'])
     @cf_common.user_guard(group='hard75')
