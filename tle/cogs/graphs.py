@@ -232,9 +232,9 @@ class Graphs(commands.Cog):
         await ctx.send_help('plot')
 
     @plot.command(brief='Plot Codeforces rating graph', usage='[+zoom] [+number] [+peak] [handles...] [d>=[[dd]mm]yyyy] [d<[[dd]mm]yyyy]')
-    async def rating(self, ctx, *args: str):
+    async def rating(self, ctx, *args: str): 
         """Plots Codeforces rating graph for the handles provided."""
-
+        
         (zoom, number, peak), args = cf_common.filter_flags(args, ['+zoom' , '+number', '+peak'])
         filt = cf_common.SubFilter()
         args = filt.parse(args)
