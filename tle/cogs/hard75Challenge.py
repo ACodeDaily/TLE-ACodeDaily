@@ -17,6 +17,7 @@ from tle.util import paginator
 from tle.util import cache_system2
 from tle.util import table
 from tle.util import ACDLaddersProblems as acdProbs
+
 class Hard75CogError(commands.CommandError):
     pass
 
@@ -156,6 +157,37 @@ class Hard75Challenge(commands.Cog):
         
         embed = self._generateStreakEmbed(handle, current_streak, longest_streak, last_updated)
         await ctx.send(f'Thanks for participating in the challenge!', embed=embed)
+    
+    @hard75.command(brief='Plots rating change during hard75', aliases=['prog'], usage='[@member|user_id]')
+    @cf_common.user_guard(group='hard75')
+    async def progress(self, ctx, member: discord.Member = None):
+        """
+        Plots the rating graph for member during hard75 challenge period.
+        """ 
+        user_id = member.id if member else ctx.author.id
+        user_name = member.display_name if member else ctx.author.display_name
+        handle, = await cf_common.resolve_handles(ctx, self.converter, ('!' + str(user_id),))
+        user = cf_common.user_db.fetch_cf_user(handle)
+        if not user.maxRating:
+            raise Hard75CogError(f'User {handle} is not rated')
+        dates = cf_common.user_db.get_Hard75Window(user_id)
+        if not dates:
+            raise Hard75CogError(f'{user_name} hasn\'t started the Hard75 challenge (`;hard75 letsgo`)')
+        first_date, last_date = dates
+        if len(last_date) == 1: 
+            raise Hard75CogError(f'{user_name} needs to complete atleast one challenge (`;hard75 completed`)')
+        yy1, mm1, dd1 = first_date.split('-')
+        yy2, mm2, dd2 = last_date.split('-')
+        start_date = str(f"d>={dd1}{mm1}{yy1}") 
+        end_date = str(f"d<{dd2}{mm2}{yy2}")
+        grpahs = self.bot.get_cog('Graphs')
+        for command in grpahs.walk_commands():
+            if command.name == 'rating':
+                await command.__call__(ctx, handle, start_date, end_date)
+                break
+        
+        
+        
 
     @hard75.command(brief='Request hard75 problems for today', aliases=['start'])
     @cf_common.user_guard(group='hard75')

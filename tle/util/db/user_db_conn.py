@@ -378,6 +378,16 @@ class UserDbConn:
             WHERE user_id = ?
         '''
         return self.conn.execute(query1,(user_id,)).fetchone()
+    
+    def get_Hard75Window(self, user_id):
+        # for ';hard75 prog'
+        query1 = '''
+            SELECT start_date, last_updated FROM hard75_challenge
+            WHERE user_id = ?
+        '''
+        res = self.conn.execute(query1,(user_id,)).fetchone()
+        if not res: return None
+        return res[0], res[1]
 
     def check_Hard75Challenge(self, user_id, date):
         query1 = '''
