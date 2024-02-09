@@ -36,7 +36,7 @@ class RefferalBot(commands.Cog):
         if not user:
             await ctx.reply("Set your cf handle first with ``;handle identify cf_handle``")
         elif user.maxRating < 1600:
-            await ctx.reply("You need to be specialist or above to apply for refferal.")
+            await ctx.reply("You need to be expert or above to apply for refferal.")
         else:
             try:
                 payload = {
