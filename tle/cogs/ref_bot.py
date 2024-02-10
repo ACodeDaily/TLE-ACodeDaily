@@ -15,14 +15,8 @@ class ReferralBotCogError(commands.CommandError):
 class ReferralBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.url = "https://ref-portal-indol.vercel.app/api/secret?cfUserName=vedantmishra69&discordId=vedantmishra69"
+        self.url = "https://ref-portal-indol.vercel.app/api/secret?cfUserName={cf_handle}&discordId={discord_id}"
         self.converter = commands.MemberConverter()
-    
-    def get_url(self, cf_handle, discord_id):
-        """
-        Prepares the URL with cf handle and discord id.
-        """
-        return f"https://ref-portal-indol.vercel.app/api/secret?cfUserName={cf_handle}&discordId={discord_id}"
     
     @commands.group(brief='Referral bot',
                     invoke_without_command=True)
@@ -65,7 +59,7 @@ class ReferralBot(commands.Cog):
             raise ReferralBotCogError(f"You must use this command in referral channel: <#{channel_id}>")
         cf_handle, = await cf_common.resolve_handles(ctx, self.converter, ('!' + str(ctx.author.id),))
         discord_id = ctx.author.name
-        url = self.get_url(cf_handle, discord_id)
+        url = self.url.format(cf_handle=cf_handle, discord_id=discord_id)
         user = cf_common.user_db.fetch_cf_user(cf_handle)
         if user.maxRating < RATING_LIMIT:
             await ctx.reply(embed=discord_common.embed_alert(f"You need to have your maximum codeforces rating >= {RATING_LIMIT}."))
