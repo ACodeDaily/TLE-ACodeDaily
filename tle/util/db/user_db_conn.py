@@ -258,6 +258,13 @@ class UserDbConn:
         ''')
         
         self.conn.execute('''
+            CREATE TABLE IF NOT EXISTS ai_settings (
+                guild_id TEXT PRIMARY KEY,
+                channel_id TEXT
+            )
+        ''')
+        
+        self.conn.execute('''
             CREATE TABLE IF NOT EXISTS rated_vc_settings (
                 guild_id TEXT PRIMARY KEY,
                 channel_id TEXT
@@ -751,6 +758,20 @@ class UserDbConn:
         rc = self.conn.execute(query, (guild_id,)).rowcount
         self.conn.commit()
         return rc
+    
+    def set_ai_channel(self, guild_id, channel_id):
+        query = ('INSERT OR REPLACE INTO ai_settings '
+                 ' (guild_id, channel_id) VALUES (?, ?)'
+                 )
+        with self.conn:
+            self.conn.execute(query, (guild_id, channel_id))
+
+    def get_ai_channel(self, guild_id):
+        query = ('SELECT channel_id '
+                 'FROM ai_settings '
+                 'WHERE guild_id = ?')
+        channel_id = self.conn.execute(query, (guild_id,)).fetchone()
+        return int(channel_id[0]) if channel_id else None
     
     def set_ref_channel(self, guild_id, channel_id):
         query = ('INSERT OR REPLACE INTO ref_settings '
