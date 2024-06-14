@@ -38,7 +38,7 @@ class ACD_AI(commands.Cog):
                               safety_settings=settings.text_safety_settings)
         
         '''gemini model for image inputs'''
-        self.image_model = genai.GenerativeModel(model_name="gemini-pro-vision",
+        self.image_model = genai.GenerativeModel(model_name="gemini-1.5-flash",
                               generation_config=settings.image_generation_config, 
                               safety_settings=settings.image_safety_settings)
         
